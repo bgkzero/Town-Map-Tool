@@ -1,0 +1,50 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "town_id": "plymouth",
+        "town_name": "Plymouth",
+        "start_year": 1620,
+        "end_year": 9999
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-70.78, 41.98], [-70.52, 41.98], [-70.52, 41.80], [-70.78, 41.80], [-70.78, 41.98]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "town_id": "boston",
+        "town_name": "Boston",
+        "start_year": 1630,
+        "end_year": 9999
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-71.12, 42.38], [-71.02, 42.38], [-71.02, 42.30], [-71.12, 42.30], [-71.12, 42.38]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "town_id": "dedham",
+        "town_name": "Dedham",
+        "start_year": 1636,
+        "end_year": 9999
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-71.22, 42.26], [-71.12, 42.26], [-71.12, 42.20], [-71.22, 42.20], [-71.22, 42.26]
+        ]]
+      }
+    }
+  ]
+}
