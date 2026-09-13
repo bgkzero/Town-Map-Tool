@@ -1,4 +1,9 @@
-// Initialize MapLibre GL JS Map
+// ==========================================
+// CONSTANTS & MAP INITIALIZATION
+// ==========================================
+const MA_CENTER = [-71.3824, 42.4072];
+const MA_ZOOM = 8;
+
 const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -9,12 +14,15 @@ const map = new maplibregl.Map({
 let isMapLocked = true;
 let isPlaying = false;
 let playInterval = null;
+let selectedCard = null;
+let activeTargetYear = null;
+let activeTownId = null;
 
 map.on('load', () => {
   // Add GeoJSON data source
   map.addSource('ma-towns', {
     type: 'geojson',
-    data: './data/ma_towns.geojson' // Relative path for GitHub Pages
+    data: './data/ma_towns.geojson'
   });
 
   // Base Polygon Fill Layer
@@ -30,7 +38,7 @@ map.on('load', () => {
     filter: ['all', ['<=', ['get', 'start_year'], 1620], ['>', ['get', 'end_year'], 1620]]
   });
 
-  // Highlight Layer (Triggered on hover)
+  // Highlight Layer (Triggered on hover/selection)
   map.addLayer({
     id: 'towns-highlight',
     type: 'fill',
@@ -48,6 +56,7 @@ map.on('load', () => {
   initPanelMinimization();
   initLibrary();
   setupSliderControls();
+  setupCardSelection();
 });
 
 // ==========================================
@@ -58,7 +67,6 @@ function initMapLockControl() {
   const lockIcon = document.getElementById('lock-icon');
   const lockText = document.getElementById('lock-text');
 
-  // Set initial locked state
   setMapLockState(true);
 
   lockBtn.addEventListener('click', () => {
@@ -74,7 +82,6 @@ function initMapLockControl() {
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
       `;
-      // Lock interactions & reset camera to Massachusetts
       map.flyTo({ center: MA_CENTER, zoom: MA_ZOOM });
       map.dragPan.disable();
       map.scrollZoom.disable();
@@ -88,7 +95,6 @@ function initMapLockControl() {
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
         <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
       `;
-      // Enable camera movement
       map.dragPan.enable();
       map.scrollZoom.enable();
       map.boxZoom.enable();
@@ -109,7 +115,7 @@ function initPanelResizer() {
 
   let isDragging = false;
 
-  resizer.addEventListener('mousedown', (e) => {
+  resizer.addEventListener('mousedown', () => {
     isDragging = true;
     resizer.classList.add('dragging');
     document.body.style.cursor = 'ns-resize';
@@ -122,14 +128,12 @@ function initPanelResizer() {
     const offsetY = e.clientY - sidebarRect.top;
     const totalHeight = sidebarRect.height;
 
-    // Boundary limits (minimum 60px height when unminimized)
     const minHeight = 60;
     const clampedY = Math.max(minHeight, Math.min(totalHeight - minHeight, offsetY));
 
     const topPercent = (clampedY / totalHeight) * 100;
     const bottomPercent = 100 - topPercent;
 
-    // Unminimize panels if user starts dragging resizer
     timelineSection.classList.remove('minimized');
     librarySection.classList.remove('minimized');
 
@@ -156,15 +160,14 @@ function initPanelMinimization() {
   const library = document.getElementById('library-section');
   const minimizeBtns = document.querySelectorAll('.minimize-btn');
 
-// Helper to update minimize buttons visibility
   function updateMinimizeButtonsVisibility() {
     const isAnyMinimized = timeline.classList.contains('minimized') || library.classList.contains('minimized');
     
     minimizeBtns.forEach(btn => {
       if (isAnyMinimized) {
-        btn.classList.add('hidden-btn'); // Hide minimize buttons on BOTH panels
+        btn.classList.add('hidden-btn');
       } else {
-        btn.classList.remove('hidden-btn'); // Show minimize buttons on both panels
+        btn.classList.remove('hidden-btn');
       }
     });
   }
@@ -181,7 +184,6 @@ function initPanelMinimization() {
     updateMinimizeButtonsVisibility();
   }
 
-  // Default Buttons (Square & Rectangle icons)
   document.querySelectorAll('.default-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -189,7 +191,6 @@ function initPanelMinimization() {
     });
   });
 
-  // Timeline Minimize Button Click
   timeline.querySelector('.minimize-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     timeline.classList.add('minimized');
@@ -201,7 +202,6 @@ function initPanelMinimization() {
     updateMinimizeButtonsVisibility();
   });
 
-  // Library Minimize Button Click
   library.querySelector('.minimize-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     library.classList.add('minimized');
@@ -213,7 +213,6 @@ function initPanelMinimization() {
     updateMinimizeButtonsVisibility();
   });
 
-  // Clicking minimized stripe bar restores panel
   timeline.querySelector('.stripe-bar').addEventListener('click', resetToDefaultSizes);
   library.querySelector('.stripe-bar').addEventListener('click', resetToDefaultSizes);
 }
@@ -294,19 +293,17 @@ function initLibrary() {
     }
   });
 
-  // Toggle Path Row Visibility
   pathToggleBtn.addEventListener("click", () => {
     isPathRowVisible = !isPathRowVisible;
     if (isPathRowVisible) {
       pathRow.classList.remove("hidden");
-      pathIcon.innerHTML = `<rect x="2" y="2" width="12" height="12" fill="currentColor"/>`; // Filled square
+      pathIcon.innerHTML = `<rect x="2" y="2" width="12" height="12" fill="currentColor"/>`;
     } else {
       pathRow.classList.add("hidden");
-      pathIcon.innerHTML = `<rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/>`; // Open square
+      pathIcon.innerHTML = `<rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/>`;
     }
   });
 
-  // Handle Timeline Inline Links
   document.addEventListener("click", (e) => {
     if (e.target.classList.contains("library-link")) {
       e.preventDefault();
@@ -337,7 +334,6 @@ function renderLibraryView(id) {
   backBtn.disabled = historyIndex <= 0;
   fwdBtn.disabled = historyIndex >= historyStack.length - 1;
 
-  // Format path text (Home > Folder 1 > Person A)
   const pathArray = item.path || ["Home"];
   pathTextEl.textContent = pathArray.join(" > ");
 
@@ -369,11 +365,127 @@ function renderLibraryView(id) {
 }
 
 // ==========================================
-// 5. SLIDER CONTROLS & TIMELINE HOVER
+// 5. TIMELINE CARD SELECTION & TRIANGLE GO
+// ==========================================
+function setupCardSelection() {
+  const cards = document.querySelectorAll('.event-card');
+  const sliderMarker = document.getElementById('slider-marker');
+  const slider = document.getElementById('year-slider');
+
+  cards.forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.classList.contains('library-link')) return;
+      selectCard(card);
+    });
+  });
+
+  if (sliderMarker) {
+    sliderMarker.addEventListener('click', executeYearJump);
+  }
+
+  document.querySelectorAll('.jump-year-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      executeYearJump();
+    });
+  });
+
+  slider.addEventListener('input', () => {
+    const currentYear = parseInt(slider.value, 10);
+    if (selectedCard && activeTargetYear) {
+      if (currentYear === activeTargetYear) {
+        hideTriangles();
+        highlightTown(activeTownId);
+      } else {
+        clearTownHighlight();
+      }
+    }
+  });
+}
+
+function selectCard(card) {
+  const panelBody = document.getElementById('timeline-events');
+  const slider = document.getElementById('year-slider');
+  const cardYear = parseInt(card.dataset.year, 10);
+  const townId = card.dataset.townId;
+  const currentSliderYear = parseInt(slider.value, 10);
+
+  if (selectedCard) selectedCard.classList.remove('selected');
+  selectedCard = card;
+  selectedCard.classList.add('selected');
+
+  activeTargetYear = cardYear;
+  activeTownId = townId;
+
+  const targetScrollTop = Math.max(0, card.offsetTop - 35);
+  panelBody.scrollTo({
+    top: targetScrollTop,
+    behavior: 'smooth'
+  });
+
+  if (cardYear === currentSliderYear) {
+    hideTriangles();
+    highlightTown(townId);
+  } else {
+    clearTownHighlight();
+    showTriangles(cardYear);
+  }
+}
+
+function showTriangles(targetYear) {
+  const marker = document.getElementById('slider-marker');
+  const slider = document.getElementById('year-slider');
+
+  const min = parseInt(slider.min, 10);
+  const max = parseInt(slider.max, 10);
+  const percent = ((targetYear - min) / (max - min)) * 100;
+
+  if (marker) {
+    marker.style.left = `calc(${percent}% + (${8 - percent * 0.16}px))`;
+    marker.classList.remove('hidden');
+  }
+
+  document.querySelectorAll('.jump-year-btn').forEach(btn => btn.classList.add('hidden'));
+  if (selectedCard) {
+    const cardBtn = selectedCard.querySelector('.jump-year-btn');
+    if (cardBtn) cardBtn.classList.remove('hidden');
+  }
+}
+
+function hideTriangles() {
+  const marker = document.getElementById('slider-marker');
+  if (marker) marker.classList.add('hidden');
+  document.querySelectorAll('.jump-year-btn').forEach(btn => btn.classList.add('hidden'));
+}
+
+function executeYearJump() {
+  if (!activeTargetYear) return;
+
+  const slider = document.getElementById('year-slider');
+  slider.value = activeTargetYear;
+
+  updateYear(activeTargetYear);
+  hideTriangles();
+  highlightTown(activeTownId);
+}
+
+function highlightTown(townId) {
+  if (map.getLayer('towns-highlight') && townId) {
+    map.setFilter('towns-highlight', ['==', ['get', 'town_id'], townId]);
+  }
+}
+
+function clearTownHighlight() {
+  if (map.getLayer('towns-highlight')) {
+    map.setFilter('towns-highlight', ['==', ['get', 'town_id'], '']);
+  }
+}
+
+// ==========================================
+// 6. SLIDER CONTROLS
 // ==========================================
 function setupSliderControls() {
   const slider = document.getElementById('year-slider');
-  const yearDisplay = document.getElementById('year-display');
   const playBtn = document.getElementById('play-btn');
 
   slider.addEventListener('input', (e) => {
@@ -410,17 +522,4 @@ function stopPlayback() {
   isPlaying = false;
   document.getElementById('play-btn').textContent = 'Play';
   clearInterval(playInterval);
-}
-
-
-function syncAccordion(year) {
-  const blocks = document.querySelectorAll('.year-block');
-  let targetBlock = document.getElementById(`year-${year}`);
-
-  blocks.forEach(b => b.removeAttribute('open'));
-
-  if (targetBlock) {
-    targetBlock.setAttribute('open', 'true');
-    targetBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
 }
