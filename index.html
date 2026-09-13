@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Massachusetts Historical Border Map (1620–1920)</title>
   
-  <!-- MapLibre GL JS CSS -->
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +12,7 @@
 
   <div class="app-container">
     
-    <!-- MAP CONTAINER (Upper-Left Overlay Controls) -->
+    <!-- MAP CONTAINER -->
     <div id="map-container">
       <div id="map"></div>
       
@@ -23,9 +22,9 @@
           <span>MA</span>
           <span class="dropdown-arrow">▼</span>
         </button>
-        <button id="lock-view-btn" class="map-ctrl-btn locked" title="Toggle Map Focus Lock">
+        <!-- MAP LOCK VIEW BUTTON -->
+        <button id="lock-view-btn" class="map-ctrl-btn locked" data-tooltip="Toggle Locked View" data-tooltip-pos="bottom">
           <svg id="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <!-- Locked Icon (Default) -->
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
@@ -34,26 +33,26 @@
       </div>
     </div>
 
-    <!-- SIDEBAR PANEL (Split Top & Bottom with Resizer) -->
+    <!-- SIDEBAR PANEL -->
     <aside id="sidebar">
       
       <!-- TOP SECTION: Timeline Panel -->
       <section id="timeline-section" class="sidebar-panel">
-        <!-- Minimized Stripe Bar -->
         <div class="stripe-bar">
           <span class="stripe-title">Timeline</span>
-          <button class="panel-btn default-btn" title="Restore Default View">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect width="14" height="14" x="1" y="1" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+         <!-- TIMELINE HEADER BUTTONS -->
+          <button class="panel-btn default-btn" data-tooltip="Default View">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect width="12" height="12" x="2" y="2" rx="1"/></svg>
+          </button>
+          <button class="panel-btn minimize-btn" data-tooltip="Minimize">
+            <svg width="12" height="2" viewBox="0 0 12 2" fill="currentColor"><rect width="12" height="2" rx="1"/></svg>
           </button>
         </div>
 
-        <!-- Full Header Content -->
         <div class="panel-full-content">
-          <!-- Row 1: Title Row -->
           <div class="title-row">
             <h2>Timeline</h2>
           </div>
-          <!-- Row 2: Controls Toolbar -->
           <div class="controls-row">
             <div class="controls-left">
               <span class="subtitle">1620 – 1920 Event Chronology</span>
@@ -68,47 +67,71 @@
             </div>
           </div>
 
-          <!-- Timeline Events Body -->
+          <!-- Timeline Events List -->
           <div id="timeline-events" class="panel-body">
-            <details class="year-block" id="year-1630" data-year="1630">
-              <summary class="year-header">
-                <span class="year-title">1630</span>
-                <span class="event-badge">Mass Bay Colony</span>
-              </summary>
-              <ul class="town-list">
-                <li class="town-item" data-town-id="boston">
-                  Boston settled under 
-                  <a href="#" class="library-link" data-card-id="john-winthrop">John Winthrop</a>
-                </li>
-                <li class="town-item" data-town-id="roxbury">Roxbury incorporated</li>
-                <li class="town-item" data-town-id="dorchester">Dorchester incorporated</li>
-              </ul>
-            </details>
+            
+            <!-- 1620 Event -->
+            <div class="event-card" data-year="1620" data-town-id="plymouth">
+              <div class="event-header">
+                <span class="event-year">1620</span>
+                <span class="event-title">Plymouth Colony</span>
+              </div>
+              <p class="event-desc">Mayflower lands; Plymouth established.</p>
+              <button class="jump-year-btn hidden" title="Jump map to 1620">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                  <path d="M2 1l8 5-8 5V1z"/>
+                </svg>
+              </button>
+            </div>
 
-            <details class="year-block" id="year-1636" data-year="1636">
-              <summary class="year-header">
-                <span class="year-title">1636</span>
-                <span class="event-badge">4 Towns Established</span>
-              </summary>
-              <ul class="town-list">
-                <li class="town-item" data-town-id="dedham">
-                  <a href="#" class="library-link" data-card-id="dedham-grant">Dedham Plantation Grant</a>
-                </li>
-                <li class="town-item" data-town-id="springfield">Springfield incorporated</li>
-                <li class="town-item" data-town-id="cambridge">Cambridge incorporated</li>
-                <li class="town-item" data-town-id="scituate">Scituate incorporated</li>
-              </ul>
-            </details>
+            <!-- 1630 Event -->
+            <div class="event-card" data-year="1630" data-town-id="boston">
+              <div class="event-header">
+                <span class="event-year">1630</span>
+                <span class="event-title">Boston Incorporated</span>
+              </div>
+              <p class="event-desc">
+                Boston settled under 
+                <a href="#" class="library-link" data-card-id="john-winthrop">John Winthrop</a>.
+              </p>
+              <button class="jump-year-btn hidden" title="Jump map to 1630">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                  <path d="M2 1l8 5-8 5V1z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- 1636 Event -->
+            <div class="event-card" data-year="1636" data-town-id="dedham">
+              <div class="event-header">
+                <span class="event-year">1636</span>
+                <span class="event-title">Dedham Plantation Grant</span>
+              </div>
+              <p class="event-desc">
+                <a href="#" class="library-link" data-card-id="dedham-grant">Dedham incorporated</a> from inland plantation grant.
+              </p>
+              <button class="jump-year-btn hidden" title="Jump map to 1636">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                  <path d="M2 1l8 5-8 5V1z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- TIMELINE EVENT CARD "GO" BUTTON -->
+            <button class="jump-year-btn hidden" data-tooltip="Go">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M2 1l8 5-8 5V1z"/>
+              </svg>
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- RESIZER DRAG BOUNDARY -->
+      <!-- RESIZER BOUNDARY -->
       <div id="panel-resizer" title="Drag up or down to resize panels"></div>
 
       <!-- BOTTOM SECTION: Library Panel -->
       <section id="library-section" class="sidebar-panel">
-        <!-- Minimized Stripe Bar -->
         <div class="stripe-bar">
           <span class="stripe-title">Library</span>
           <button class="panel-btn default-btn" title="Restore Default View">
@@ -116,41 +139,32 @@
           </button>
         </div>
 
-        <!-- Full Header Content -->
         <div class="panel-full-content">
-          <!-- Row 1: Title Row -->
           <div class="title-row">
             <h2>Library</h2>
           </div>
-          <!-- Row 2: Controls Toolbar -->
           <div class="controls-row">
             <div class="controls-left">
-              <button id="lib-back" class="nav-btn" disabled title="Back">&larr;</button>
-              <button id="lib-forward" class="nav-btn" disabled title="Forward">&rarr;</button>
+              <button id="lib-back" class="nav-btn" disabled data-tooltip="Back">&larr;</button>
+              <button id="lib-forward" class="nav-btn" disabled data-tooltip="Forward">&rarr;</button>
             </div>
             <div class="controls-right">
-              <!-- Landscape Rectangle Icon for Library Default Size -->
-              <button class="panel-btn default-btn" title="Reset to Default Size">
+              <button class="panel-btn default-btn" data-tooltip="Default View">
                 <svg width="14" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="10" x="1" y="1" rx="1"/></svg>
               </button>
-              <button class="panel-btn minimize-btn" title="Minimize Panel">
+              <button class="panel-btn minimize-btn" data-tooltip="Minimize">
                 <svg width="12" height="2" viewBox="0 0 12 2" fill="currentColor"><rect width="12" height="2" rx="1"/></svg>
               </button>
             </div>
           </div>
 
-          <!-- Library Content Body -->
-          <div id="library-content" class="panel-body">
-            <!-- Explorer view dynamically populated here -->
-          </div>
+          <div id="library-content" class="panel-body"></div>
 
-          <!-- Bottom Path / Status Row -->
           <div id="library-path-row" class="path-row">
             <span id="library-path-text" class="path-text">Home</span>
             <button id="toggle-path-btn" class="path-toggle-btn" title="Toggle Path Row Visibility">
-              <!-- Open Square Icon (Toggles to filled when path row is on) -->
               <svg id="path-toggle-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/>
+                <rect x="2" y="2" width="12" height="12" fill="currentColor"/>
               </svg>
             </button>
           </div>
@@ -159,17 +173,30 @@
 
     </aside>
 
-    <!-- Bottom Slider Controls -->
+    <!-- Bottom Slider Controls (With Floating Down-Triangle Marker Container) -->
     <div id="slider-controls">
       <button id="play-btn">Play</button>
       <div class="slider-wrapper">
+        
+        <!-- Blue Downward Triangle Indicator above Slider Track -->
+        <div id="slider-marker" class="slider-marker hidden" title="Jump to selected event year">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="#0d6efd">
+            <path d="M0 0l6 10 6-10H0z"/>
+          </svg>
+        </div>
+
+        <div id="slider-marker" class="slider-marker hidden" data-tooltip="Go">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="#0d6efd">
+            <path d="M0 0l6 10 6-10H0z"/>
+          </svg>
+        </div>
+
         <label for="year-slider">Year: <strong id="year-display">1620</strong></label>
         <input type="range" id="year-slider" min="1620" max="1920" value="1620" step="1">
       </div>
     </div>
   </div>
 
-  <!-- MapLibre GL JS Script -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="app.js"></script>
 </body>

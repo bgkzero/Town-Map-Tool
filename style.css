@@ -337,3 +337,181 @@ body, html {
 #play-btn { padding: 0.4rem 1rem; background: #0d6efd; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
 .slider-wrapper { display: flex; align-items: center; gap: 1rem; flex-grow: 1; }
 #year-slider { flex-grow: 1; }
+
+/* Event Card Styling */
+.event-card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card:hover {
+  border-color: #a5d8ff;
+  background-color: #f8f9fa;
+}
+
+.event-card.selected {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+  background-color: #ffffff;
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.event-year {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.event-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.event-desc {
+  font-size: 0.825rem;
+  color: #495057;
+  line-height: 1.4;
+}
+
+/* Blue Triangle Jump Button inside Selected Card */
+.jump-year-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background-color: #0d6efd;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.15s ease, background-color 0.15s ease;
+}
+
+.jump-year-btn:hover {
+  background-color: #0b5ed7;
+  transform: scale(1.08);
+}
+
+.jump-year-btn.hidden,
+.slider-marker.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Floating Down-Triangle Marker on Timeline Slider */
+.slider-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-grow: 1;
+}
+
+.slider-marker {
+  position: absolute;
+  top: -14px;
+  transform: translateX(-50%);
+  cursor: pointer;
+  z-index: 20;
+  opacity: 1;
+  transition: left 0.15s ease, opacity 0.3s ease;
+  filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.2));
+}
+
+.slider-marker:hover svg {
+  fill: #0b5ed7;
+  transform: scale(1.2);
+}
+
+/* ==========================================
+   CUSTOM TOOLTIP STYLING (HOVER TEXT BOXES)
+   ========================================== */
+[data-tooltip] {
+  position: relative;
+}
+
+/* Tooltip Box */
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px); /* Positioned right above the button */
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background-color: #212529;
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.725rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none; /* Prevents tooltip from interfering with mouse clicks */
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Tooltip Arrow Indicator */
+[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border-width: 5px 5px 0 5px;
+  border-style: solid;
+  border-color: #212529 transparent transparent transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 1000;
+}
+
+/* Show Tooltip on Hover */
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip Position Variation: Below Element */
+[data-tooltip-pos="bottom"]::after {
+  top: calc(100% + 6px);
+  bottom: auto;
+  transform: translateX(-50%) translateY(-4px);
+}
+[data-tooltip-pos="bottom"]::before {
+  top: calc(100% + 1px);
+  bottom: auto;
+  border-width: 0 5px 5px 5px;
+  border-color: transparent transparent #212529 transparent;
+  transform: translateX(-50%) translateY(-4px);
+}
+[data-tooltip-pos="bottom"]:hover::after,
+[data-tooltip-pos="bottom"]:hover::before {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Hide minimize buttons when a panel is minimized */
+.minimize-btn.hidden-btn {
+  display: none !important;
+}

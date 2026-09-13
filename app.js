@@ -154,14 +154,31 @@ function initPanelResizer() {
 function initPanelMinimization() {
   const timeline = document.getElementById('timeline-section');
   const library = document.getElementById('library-section');
+  const minimizeBtns = document.querySelectorAll('.minimize-btn');
+
+// Helper to update minimize buttons visibility
+  function updateMinimizeButtonsVisibility() {
+    const isAnyMinimized = timeline.classList.contains('minimized') || library.classList.contains('minimized');
+    
+    minimizeBtns.forEach(btn => {
+      if (isAnyMinimized) {
+        btn.classList.add('hidden-btn'); // Hide minimize buttons on BOTH panels
+      } else {
+        btn.classList.remove('hidden-btn'); // Show minimize buttons on both panels
+      }
+    });
+  }
 
   function resetToDefaultSizes() {
     timeline.classList.remove('minimized');
     library.classList.remove('minimized');
+
     timeline.style.height = '50%';
     timeline.style.flex = '0 0 50%';
     library.style.height = '50%';
     library.style.flex = '0 0 50%';
+
+    updateMinimizeButtonsVisibility();
   }
 
   // Default Buttons (Square & Rectangle icons)
@@ -172,21 +189,28 @@ function initPanelMinimization() {
     });
   });
 
-  // Minimize Buttons
+  // Timeline Minimize Button Click
   timeline.querySelector('.minimize-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     timeline.classList.add('minimized');
     library.classList.remove('minimized');
+    
     library.style.height = 'calc(100% - 34px)';
     library.style.flex = '1';
+
+    updateMinimizeButtonsVisibility();
   });
 
+  // Library Minimize Button Click
   library.querySelector('.minimize-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     library.classList.add('minimized');
     timeline.classList.remove('minimized');
+    
     timeline.style.height = 'calc(100% - 34px)';
     timeline.style.flex = '1';
+
+    updateMinimizeButtonsVisibility();
   });
 
   // Clicking minimized stripe bar restores panel
