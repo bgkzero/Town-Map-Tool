@@ -12,58 +12,154 @@
 <body>
 
   <div class="app-container">
-    <!-- Map Container (2/3 width) -->
-    <div id="map"></div>
+    
+    <!-- MAP CONTAINER (Upper-Left Overlay Controls) -->
+    <div id="map-container">
+      <div id="map"></div>
+      
+      <!-- Top-Left Map Controls Bar -->
+      <div id="map-controls-bar">
+        <button id="state-select-btn" class="map-ctrl-btn">
+          <span>MA</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <button id="lock-view-btn" class="map-ctrl-btn locked" title="Toggle Map Focus Lock">
+          <svg id="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- Locked Icon (Default) -->
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span id="lock-text">Locked</span>
+        </button>
+      </div>
+    </div>
 
-    <!-- Timeline Sidebar (1/3 width) -->
+    <!-- SIDEBAR PANEL (Split Top & Bottom with Resizer) -->
     <aside id="sidebar">
-      <div class="sidebar-header">
-        <h2>Historical Timeline</h2>
-        <p>Hover over a town below or on the map to highlight borders.</p>
-      </div>
+      
+      <!-- TOP SECTION: Timeline Panel -->
+      <section id="timeline-section" class="sidebar-panel">
+        <!-- Minimized Stripe Bar -->
+        <div class="stripe-bar">
+          <span class="stripe-title">Timeline</span>
+          <button class="panel-btn default-btn" title="Restore Default View">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><rect width="14" height="14" x="1" y="1" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+        </div>
 
-      <div id="timeline-events">
-        <!-- 1620 Event -->
-        <details class="year-block" id="year-1620" data-year="1620">
-          <summary class="year-header">
-            <span class="year-title">1620</span>
-            <span class="event-badge">Plymouth Colony</span>
-          </summary>
-          <ul class="town-list">
-            <li class="town-item" data-town-id="plymouth">Mayflower lands; Plymouth established</li>
-          </ul>
-        </details>
+        <!-- Full Header Content -->
+        <div class="panel-full-content">
+          <!-- Row 1: Title Row -->
+          <div class="title-row">
+            <h2>Timeline</h2>
+          </div>
+          <!-- Row 2: Controls Toolbar -->
+          <div class="controls-row">
+            <div class="controls-left">
+              <span class="subtitle">1620 – 1920 Event Chronology</span>
+            </div>
+            <div class="controls-right">
+              <button class="panel-btn default-btn" title="Reset to Default Size">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><rect width="12" height="12" x="2" y="2" rx="1"/></svg>
+              </button>
+              <button class="panel-btn minimize-btn" title="Minimize Panel">
+                <svg width="12" height="2" viewBox="0 0 12 2" fill="currentColor"><rect width="12" height="2" rx="1"/></svg>
+              </button>
+            </div>
+          </div>
 
-        <!-- 1630 Event -->
-        <details class="year-block" id="year-1630" data-year="1630">
-          <summary class="year-header">
-            <span class="year-title">1630</span>
-            <span class="event-badge">Mass Bay Colony</span>
-          </summary>
-          <ul class="town-list">
-            <li class="town-item" data-town-id="boston">Boston settled (Shawmut Peninsula)</li>
-            <li class="town-item" data-town-id="roxbury">Roxbury incorporated</li>
-            <li class="town-item" data-town-id="dorchester">Dorchester incorporated</li>
-          </ul>
-        </details>
+          <!-- Timeline Events Body -->
+          <div id="timeline-events" class="panel-body">
+            <details class="year-block" id="year-1630" data-year="1630">
+              <summary class="year-header">
+                <span class="year-title">1630</span>
+                <span class="event-badge">Mass Bay Colony</span>
+              </summary>
+              <ul class="town-list">
+                <li class="town-item" data-town-id="boston">
+                  Boston settled under 
+                  <a href="#" class="library-link" data-card-id="john-winthrop">John Winthrop</a>
+                </li>
+                <li class="town-item" data-town-id="roxbury">Roxbury incorporated</li>
+                <li class="town-item" data-town-id="dorchester">Dorchester incorporated</li>
+              </ul>
+            </details>
 
-        <!-- 1636 Event -->
-        <details class="year-block" id="year-1636" data-year="1636">
-          <summary class="year-header">
-            <span class="year-title">1636</span>
-            <span class="event-badge">4 Towns Established</span>
-          </summary>
-          <ul class="town-list">
-            <li class="town-item" data-town-id="springfield">Springfield settlement begins</li>
-            <li class="town-item" data-town-id="cambridge">Cambridge (Newe Towne) incorporated</li>
-            <li class="town-item" data-town-id="dedham">Dedham plantation grant incorporated</li>
-            <li class="town-item" data-town-id="scituate">Scituate incorporated</li>
-          </ul>
-        </details>
-      </div>
+            <details class="year-block" id="year-1636" data-year="1636">
+              <summary class="year-header">
+                <span class="year-title">1636</span>
+                <span class="event-badge">4 Towns Established</span>
+              </summary>
+              <ul class="town-list">
+                <li class="town-item" data-town-id="dedham">
+                  <a href="#" class="library-link" data-card-id="dedham-grant">Dedham Plantation Grant</a>
+                </li>
+                <li class="town-item" data-town-id="springfield">Springfield incorporated</li>
+                <li class="town-item" data-town-id="cambridge">Cambridge incorporated</li>
+                <li class="town-item" data-town-id="scituate">Scituate incorporated</li>
+              </ul>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESIZER DRAG BOUNDARY -->
+      <div id="panel-resizer" title="Drag up or down to resize panels"></div>
+
+      <!-- BOTTOM SECTION: Library Panel -->
+      <section id="library-section" class="sidebar-panel">
+        <!-- Minimized Stripe Bar -->
+        <div class="stripe-bar">
+          <span class="stripe-title">Library</span>
+          <button class="panel-btn default-btn" title="Restore Default View">
+            <svg width="14" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="10" x="1" y="1" rx="1"/></svg>
+          </button>
+        </div>
+
+        <!-- Full Header Content -->
+        <div class="panel-full-content">
+          <!-- Row 1: Title Row -->
+          <div class="title-row">
+            <h2>Library</h2>
+          </div>
+          <!-- Row 2: Controls Toolbar -->
+          <div class="controls-row">
+            <div class="controls-left">
+              <button id="lib-back" class="nav-btn" disabled title="Back">&larr;</button>
+              <button id="lib-forward" class="nav-btn" disabled title="Forward">&rarr;</button>
+            </div>
+            <div class="controls-right">
+              <!-- Landscape Rectangle Icon for Library Default Size -->
+              <button class="panel-btn default-btn" title="Reset to Default Size">
+                <svg width="14" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="10" x="1" y="1" rx="1"/></svg>
+              </button>
+              <button class="panel-btn minimize-btn" title="Minimize Panel">
+                <svg width="12" height="2" viewBox="0 0 12 2" fill="currentColor"><rect width="12" height="2" rx="1"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Library Content Body -->
+          <div id="library-content" class="panel-body">
+            <!-- Explorer view dynamically populated here -->
+          </div>
+
+          <!-- Bottom Path / Status Row -->
+          <div id="library-path-row" class="path-row">
+            <span id="library-path-text" class="path-text">Home</span>
+            <button id="toggle-path-btn" class="path-toggle-btn" title="Toggle Path Row Visibility">
+              <!-- Open Square Icon (Toggles to filled when path row is on) -->
+              <svg id="path-toggle-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="2" y="2" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
     </aside>
 
-    <!-- Bottom Slider Control Controls -->
+    <!-- Bottom Slider Controls -->
     <div id="slider-controls">
       <button id="play-btn">Play</button>
       <div class="slider-wrapper">
