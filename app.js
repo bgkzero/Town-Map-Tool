@@ -18,14 +18,29 @@ let selectedCard = null;
 let activeTargetYear = null;
 let activeTownId = null;
 
+// Initialize UI elements immediately when DOM is ready (does not wait for map tiles)
+function initUI() {
+  initMapLockControl();
+  initPanelResizer();
+  initPanelMinimization();
+  initLibrary();
+  setupSliderControls();
+  setupCardSelection();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initUI);
+} else {
+  initUI();
+}
+
+// Map GeoJSON source & layer setup
 map.on('load', () => {
-  // Add GeoJSON data source
   map.addSource('ma-towns', {
     type: 'geojson',
     data: './data/ma_towns.geojson'
   });
 
-  // Base Polygon Fill Layer
   map.addLayer({
     id: 'towns-base',
     type: 'fill',
@@ -38,7 +53,6 @@ map.on('load', () => {
     filter: ['all', ['<=', ['get', 'start_year'], 1620], ['>', ['get', 'end_year'], 1620]]
   });
 
-  // Highlight Layer (Triggered on hover/selection)
   map.addLayer({
     id: 'towns-highlight',
     type: 'fill',
@@ -50,13 +64,6 @@ map.on('load', () => {
     },
     filter: ['==', ['get', 'town_id'], '']
   });
-
-  initMapLockControl();
-  initPanelResizer();
-  initPanelMinimization();
-  initLibrary();
-  setupSliderControls();
-  setupCardSelection();
 });
 
 // ==========================================
@@ -66,6 +73,8 @@ function initMapLockControl() {
   const lockBtn = document.getElementById('lock-view-btn');
   const lockIcon = document.getElementById('lock-icon');
   const lockText = document.getElementById('lock-text');
+
+  if (!lockBtn) return;
 
   setMapLockState(true);
 
@@ -112,6 +121,8 @@ function initPanelResizer() {
   const timelineSection = document.getElementById('timeline-section');
   const librarySection = document.getElementById('library-section');
   const sidebar = document.getElementById('sidebar');
+
+  if (!resizer) return;
 
   let isDragging = false;
 
@@ -191,27 +202,34 @@ function initPanelMinimization() {
     });
   });
 
-  timeline.querySelector('.minimize-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    timeline.classList.add('minimized');
-    library.classList.remove('minimized');
-    
-    library.style.height = 'calc(100% - 34px)';
-    library.style.flex = '1';
+  // Target visible minimize buttons in header controls
+  const timelineMinBtn = timeline.querySelector('.controls-right .minimize-btn');
+  if (timelineMinBtn) {
+    timelineMinBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      timeline.classList.add('minimized');
+      library.classList.remove('minimized');
+      
+      library.style.height = 'calc(100% - 34px)';
+      library.style.flex = '1';
 
-    updateMinimizeButtonsVisibility();
-  });
+      updateMinimizeButtonsVisibility();
+    });
+  }
 
-  library.querySelector('.minimize-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    library.classList.add('minimized');
-    timeline.classList.remove('minimized');
-    
-    timeline.style.height = 'calc(100% - 34px)';
-    timeline.style.flex = '1';
+  const libraryMinBtn = library.querySelector('.controls-right .minimize-btn');
+  if (libraryMinBtn) {
+    libraryMinBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      library.classList.add('minimized');
+      timeline.classList.remove('minimized');
+      
+      timeline.style.height = 'calc(100% - 34px)';
+      timeline.style.flex = '1';
 
-    updateMinimizeButtonsVisibility();
-  });
+      updateMinimizeButtonsVisibility();
+    });
+  }
 
   timeline.querySelector('.stripe-bar').addEventListener('click', resetToDefaultSizes);
   library.querySelector('.stripe-bar').addEventListener('click', resetToDefaultSizes);
@@ -279,6 +297,8 @@ function initLibrary() {
   const pathRow = document.getElementById("library-path-row");
   const pathIcon = document.getElementById("path-toggle-icon");
 
+  if (!backBtn) return;
+
   backBtn.addEventListener("click", () => {
     if (historyIndex > 0) {
       historyIndex--;
@@ -330,6 +350,8 @@ function renderLibraryView(id) {
   const pathTextEl = document.getElementById("library-path-text");
   const backBtn = document.getElementById("lib-back");
   const fwdBtn = document.getElementById("lib-forward");
+
+  if (!contentEl) return;
 
   backBtn.disabled = historyIndex <= 0;
   fwdBtn.disabled = historyIndex >= historyStack.length - 1;
@@ -488,17 +510,23 @@ function setupSliderControls() {
   const slider = document.getElementById('year-slider');
   const playBtn = document.getElementById('play-btn');
 
+  if (!slider) return;
+
   slider.addEventListener('input', (e) => {
     updateYear(parseInt(e.target.value, 10));
   });
 
-  playBtn.addEventListener('click', () => {
-    if (isPlaying) stopPlayback(); else startPlayback();
-  });
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) stopPlayback(); else startPlayback();
+    });
+  }
 }
 
 function updateYear(year) {
-  document.getElementById('year-display').textContent = year;
+  const display = document.getElementById('year-display');
+  if (display) display.textContent = year;
+
   if (map.getLayer('towns-base')) {
     map.setFilter('towns-base', [
       'all',
@@ -510,7 +538,8 @@ function updateYear(year) {
 
 function startPlayback() {
   isPlaying = true;
-  document.getElementById('play-btn').textContent = 'Pause';
+  const playBtn = document.getElementById('play-btn');
+  if (playBtn) playBtn.textContent = 'Pause';
   const slider = document.getElementById('year-slider');
   playInterval = setInterval(() => {
     let current = parseInt(slider.value, 10);
@@ -520,6 +549,7 @@ function startPlayback() {
 
 function stopPlayback() {
   isPlaying = false;
-  document.getElementById('play-btn').textContent = 'Play';
+  const playBtn = document.getElementById('play-btn');
+  if (playBtn) playBtn.textContent = 'Play';
   clearInterval(playInterval);
 }
