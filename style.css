@@ -1,6 +1,3 @@
-/* ==========================================
-   GLOBAL RESET & LAYOUT GRID
-   ========================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -17,15 +14,13 @@ body, html {
 
 .app-container {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* 2/3 Main View, 1/3 Side Panel */
+  grid-template-columns: 2fr 1fr;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
 
-/* ==========================================
-   MAIN VIEW (LEFT 2/3)
-   ========================================== */
+/* MAIN VIEW */
 #main-view {
   grid-column: 1 / 2;
   display: flex;
@@ -47,7 +42,6 @@ body, html {
   height: 100%;
 }
 
-/* Map Controls Bar Overlay */
 #map-controls-bar {
   position: absolute;
   top: 15px;
@@ -80,31 +74,27 @@ body, html {
 .map-ctrl-btn.locked { background-color: #e7f5ff; border-color: #74c0fc; color: #1971c2; }
 .dropdown-arrow { font-size: 0.65rem; color: #6c757d; }
 
-/* ==========================================
-   SLIDER PANEL (FIXED HEIGHT AT BOTTOM)
-   ========================================== */
+/* SLIDER PANEL (Item #9: Extra top padding for Here Indicator) */
 #slider-panel {
   background: #ffffff;
   border-top: 1px solid #ced4da;
-  padding: 16px 24px;
+  padding: 24px 24px 12px 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-/* Slider Container */
 #slider-container {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 40px; /* CENTURY view breathability margin */
+  margin: 0 40px;
 }
 
-/* "Here" Indicator Scalene Triangle */
 .here-indicator {
   position: absolute;
-  top: -18px;
+  top: -20px;
   transform: translateX(-50%);
   z-index: 25;
   transition: left 0.15s ease, color 0.2s ease;
@@ -112,7 +102,6 @@ body, html {
 .here-indicator.gray { color: #868e96; }
 .here-indicator.blue { color: #0d6efd; }
 
-/* Timeline Viewport & Track */
 #timeline-viewport {
   width: 100%;
   overflow-x: auto;
@@ -124,7 +113,8 @@ body, html {
 #timeline-track {
   position: relative;
   height: 36px;
-  min-width: 100%;
+  width: 100%; /* Dynamically expanded by JS in Decade/Year view (Item #11) */
+  transition: width 0.2s ease;
 }
 
 #timeline-line {
@@ -136,7 +126,6 @@ body, html {
   background-color: #000000;
 }
 
-/* Ticks & Labels */
 .tick-mark {
   position: absolute;
   top: 18px;
@@ -167,7 +156,6 @@ body, html {
 }
 .event-circle:hover { transform: translate(-50%, -50%) scale(1.4); background-color: #0d6efd; }
 
-/* Handle */
 .timeline-handle {
   position: absolute;
   top: 10px;
@@ -209,17 +197,17 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
 }
 
 .controls-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .ctrl-btn {
-  height: 28px;
+  height: 38px;
   padding: 0 10px;
   background: #ffffff;
   border: 1px solid #ced4da;
@@ -230,11 +218,27 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
 }
 .ctrl-btn:hover { background-color: #f1f3f5; }
 
-/* Zoom Slider */
+/* Item #10: Stepper Buttons with Text Underneath */
+.stepper-btn {
+  height: 38px;
+  padding: 2px 8px;
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+}
+.stepper-btn:hover { background-color: #f1f3f5; }
+.stepper-btn .btn-icon { font-size: 0.75rem; line-height: 1; font-weight: 700; color: #212529; }
+.stepper-btn .btn-label { font-size: 0.625rem; color: #6c757d; font-weight: 600; margin-top: 2px; text-transform: uppercase; }
+
 #zoom-container {
   display: flex;
   flex-direction: column;
@@ -244,13 +248,12 @@ body, html {
 #zoom-slider { width: 80px; height: 4px; cursor: pointer; }
 .zoom-title { font-size: 0.7rem; font-weight: 700; color: #495057; letter-spacing: 0.5px; }
 
-/* Showing Bar & Status */
 .handle-icon-indicator { font-weight: bold; color: #495057; }
 .showing-bar {
   display: flex;
   align-items: center;
   background: #e9ecef;
-  padding: 2px 8px;
+  padding: 4px 8px;
   border-radius: 4px;
   gap: 6px;
 }
@@ -272,9 +275,7 @@ body, html {
 #showing-status-row { height: 14px; text-align: right; }
 #showing-status-text { font-size: 0.725rem; color: #dc3545; font-weight: 500; }
 
-/* ==========================================
-   SIDE PANEL (RIGHT 1/3)
-   ========================================== */
+/* SIDE PANEL */
 #sidebar {
   grid-column: 2 / 3;
   display: flex;
@@ -287,7 +288,6 @@ body, html {
 .sidebar-panel {
   display: flex;
   flex-direction: column;
-  height: 50%;
   overflow: hidden;
   background: #ffffff;
 }
@@ -295,7 +295,13 @@ body, html {
 #timeline-section { height: 60%; }
 #library-section { height: 40%; }
 
-/* Movable Resizer */
+.panel-full-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
 #panel-resizer {
   height: 6px;
   background-color: #e9ecef;
@@ -306,7 +312,6 @@ body, html {
 }
 #panel-resizer:hover, #panel-resizer.dragging { background-color: #74c0fc; }
 
-/* Headers */
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -314,6 +319,7 @@ body, html {
   padding: 8px 14px;
   height: 34px;
   border-bottom: 1px solid #e9ecef;
+  flex-shrink: 0;
 }
 .panel-title { font-size: 0.85rem; font-weight: 700; color: #495057; letter-spacing: 0.5px; }
 .header-buttons { display: flex; gap: 4px; }
@@ -326,9 +332,16 @@ body, html {
 .panel-btn:hover, .nav-btn:hover:not(:disabled) { background-color: #f1f3f5; }
 .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-.panel-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; position: relative; }
+/* Item #2: Scrollbar enabled for Timeline Body */
+.panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  position: relative;
+}
 
-/* Minimized Stripe Bar */
 .stripe-bar {
   display: none; height: 34px; padding: 0 14px;
   align-items: center; justify-content: space-between;
@@ -340,10 +353,11 @@ body, html {
 .sidebar-panel.minimized .panel-full-content { display: none; }
 .sidebar-panel.minimized .stripe-bar { display: flex; }
 
-/* Path Bar */
+/* Item #4: Path bar pinned to bottom */
 .path-bar {
   display: flex; align-items: center; justify-content: space-between;
   height: 34px; padding: 0 14px; background-color: #f8f9fa; border-top: 1px solid #e9ecef;
+  flex-shrink: 0;
 }
 .path-text { font-size: 0.8rem; color: #495057; }
 .path-text a { color: #0d6efd; text-decoration: none; font-weight: 600; cursor: pointer; }
@@ -351,9 +365,7 @@ body, html {
 .path-toggle-btn { background: none; border: none; cursor: pointer; color: #495057; }
 .path-bar.hidden-text .path-text { visibility: hidden; }
 
-/* ==========================================
-   EVENT CARDS (3-ROW STRUCTURE)
-   ========================================== */
+/* EVENT CARDS */
 #vertical-timeline-track { position: relative; padding-left: 20px; }
 #vertical-line { position: absolute; top: 0; bottom: 0; left: 6px; width: 2px; background-color: #000; }
 
@@ -370,13 +382,11 @@ body, html {
 .event-card.highlighted { border-color: #495057; }
 .event-card.selected { border-color: #0d6efd; box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2); }
 
-/* Row 1: Date Row */
 .card-date-row { display: flex; align-items: center; font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
 .card-year-col { color: #0d6efd; width: 45px; }
 .card-divider-col { margin: 0 6px; color: #000; }
 .card-date-col { color: #212529; }
 
-/* Row 2: Content Row */
 .card-content-row {
   background: #ffffff;
   border-radius: 6px;
@@ -387,7 +397,6 @@ body, html {
 .card-desc { font-size: 0.8rem; color: #495057; line-height: 1.35; }
 .library-link { color: #0d6efd; text-decoration: underline; font-weight: 600; cursor: pointer; }
 
-/* Row 3: Footer Row */
 .card-footer-row { display: flex; justify-content: space-between; align-items: center; }
 .card-sources-col { font-size: 0.75rem; color: #6c757d; font-weight: 600; }
 .card-go-btn {
@@ -398,9 +407,7 @@ body, html {
 .card-go-btn svg { fill: #868e96; }
 .event-card.selected .card-go-btn svg { fill: #0d6efd; }
 
-/* ==========================================
-   CUSTOM TOOLTIPS (EDGE-CLAMPED)
-   ========================================== */
+/* TOOLTIPS */
 [data-tooltip] { position: relative; }
 
 [data-tooltip]::after {
@@ -419,14 +426,19 @@ body, html {
 
 [data-tooltip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Bottom Tooltips */
 [data-tooltip-pos="bottom"]::after {
   top: calc(100% + 6px); bottom: auto;
   transform: translateX(-50%) translateY(-4px);
 }
 [data-tooltip-pos="bottom"]:hover::after { transform: translateX(-50%) translateY(0); }
 
-/* Right Edge Clamped Tooltips */
+/* Item #5: Left aligned tooltip for state dropdown */
+[data-tooltip-pos="bottom-left"]::after {
+  top: calc(100% + 6px); bottom: auto;
+  left: 0; transform: translateY(-4px);
+}
+[data-tooltip-pos="bottom-left"]:hover::after { transform: translateY(0); }
+
 [data-tooltip-pos="bottom-edge"]::after {
   top: calc(100% + 6px); bottom: auto;
   left: auto; right: 0;

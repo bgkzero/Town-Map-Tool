@@ -24,16 +24,18 @@
         
         <!-- Top-Left Map Controls Bar -->
         <div id="map-controls-bar">
-          <button id="state-select-btn" class="map-ctrl-btn" data-tooltip="Functionality TBD" data-tooltip-pos="bottom-edge">
+          <!-- Item #5: Tooltip aligned to left edge -->
+          <button id="state-select-btn" class="map-ctrl-btn" data-tooltip="Functionality TBD" data-tooltip-pos="bottom-left">
             <span>MA</span>
             <span class="dropdown-arrow">▼</span>
           </button>
-          <button id="lock-view-btn" class="map-ctrl-btn locked" data-tooltip="Toggle Locked View" data-tooltip-pos="bottom">
+          <!-- Item #1: Starts Unlocked by default -->
+          <button id="lock-view-btn" class="map-ctrl-btn" data-tooltip="Toggle Locked View" data-tooltip-pos="bottom">
             <svg id="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
             </svg>
-            <span id="lock-text">Locked</span>
+            <span id="lock-text">Unlocked</span>
           </button>
         </div>
       </div>
@@ -43,14 +45,14 @@
         
         <!-- ROW 1: SLIDER CONTAINER -->
         <div id="slider-container">
-          <!-- "Here" Indicator Scalene Triangle -->
+          <!-- Item #9: Top margin prevents clipping of Here Indicator -->
           <div id="here-indicator" class="here-indicator gray" title="Here Indicator">
             <svg width="14" height="14" viewBox="0 0 16 16">
               <polygon points="2,0 14,0 5,16" fill="currentColor"/>
             </svg>
           </div>
 
-          <!-- Horizontal Timeline Scroll Viewport -->
+          <!-- Horizontal Timeline Scroll Viewport (Item #11) -->
           <div id="timeline-viewport">
             <div id="timeline-track">
               <div id="timeline-line"></div>
@@ -61,7 +63,7 @@
             </div>
           </div>
 
-          <!-- Year Titles Row -->
+          <!-- Year Titles Row (Item #12) -->
           <div id="year-titles-row"></div>
           
           <!-- Circle Hover Tooltip Space -->
@@ -96,30 +98,39 @@
             </button>
           </div>
 
-          <!-- MIDDLE: STEPPER CONTROLS -->
+          <!-- MIDDLE: STEPPER CONTROLS (Item #10: Text underneath buttons) -->
           <div class="controls-group stepper-controls">
-            <button id="prev-year-btn" class="ctrl-btn" data-tooltip="Previous Year">◄◄</button>
-            <button id="prev-event-btn" class="ctrl-btn" data-tooltip="Previous Event">◄</button>
-            <button id="play-pause-btn" class="ctrl-btn play-btn" data-tooltip="Play/Pause">
-              <span id="play-icon">▶</span>
-              <span id="play-text">Play</span>
+            <button id="prev-year-btn" class="stepper-btn">
+              <span class="btn-icon">◄◄</span>
+              <span class="btn-label">Prev Year</span>
             </button>
-            <button id="next-event-btn" class="ctrl-btn" data-tooltip="Next Event">►</button>
-            <button id="next-year-btn" class="ctrl-btn" data-tooltip="Next Year">►►</button>
+            <button id="prev-event-btn" class="stepper-btn">
+              <span class="btn-icon">◄</span>
+              <span class="btn-label">Prev Event</span>
+            </button>
+            <button id="play-pause-btn" class="stepper-btn play-btn">
+              <span id="play-icon" class="btn-icon">▶</span>
+              <span id="play-text" class="btn-label">Play</span>
+            </button>
+            <button id="next-event-btn" class="stepper-btn">
+              <span class="btn-icon">►</span>
+              <span class="btn-label">Next Event</span>
+            </button>
+            <button id="next-year-btn" class="stepper-btn">
+              <span class="btn-icon">►►</span>
+              <span class="btn-label">Next Year</span>
+            </button>
           </div>
 
           <!-- RIGHT: SHOWING CONTROLS -->
           <div class="controls-group showing-controls">
-            <!-- Handle Icon -->
             <div class="handle-icon-indicator" title="Current Handle Position">│</div>
 
-            <!-- Showing Bar -->
             <div class="showing-bar">
               <input type="text" id="year-field" value="1620" maxlength="4" placeholder="YYYY" />
               <span id="events-amount" class="events-amount">(1 event)</span>
             </div>
 
-            <!-- Link Button -->
             <button id="link-btn" class="ctrl-btn link-btn unlinked" data-tooltip="Toggle Link">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
@@ -127,7 +138,6 @@
               </svg>
             </button>
 
-            <!-- Linked Indicator -->
             <div id="linked-indicator" class="linked-indicator gray" title="Linked Indicator">
               <svg width="12" height="12" viewBox="0 0 16 16">
                 <polygon points="2,0 14,0 5,16" fill="currentColor"/>
@@ -152,7 +162,6 @@
       
       <!-- TOP SECTION: TIMELINE PANEL -->
       <section id="timeline-section" class="sidebar-panel">
-        <!-- Minimized Stripe Bar -->
         <div class="stripe-bar">
           <span class="stripe-title">TIMELINE</span>
           <button class="panel-btn default-btn" data-tooltip="Default View" data-tooltip-pos="bottom-edge">
@@ -161,7 +170,6 @@
         </div>
 
         <div class="panel-full-content">
-          <!-- Timeline Header -->
           <div class="panel-header">
             <h2 class="panel-title">TIMELINE</h2>
             <div class="header-buttons">
@@ -174,13 +182,11 @@
             </div>
           </div>
 
-          <!-- Timeline Body (Vertical Line & Event Cards) -->
+          <!-- Item #2 & #7: Scrollable Timeline Body -->
           <div id="timeline-body" class="panel-body">
             <div id="vertical-timeline-track">
               <div id="vertical-line"></div>
-              <div id="event-cards-list">
-                <!-- Dynamically generated event cards -->
-              </div>
+              <div id="event-cards-list"></div>
             </div>
           </div>
         </div>
@@ -191,7 +197,6 @@
 
       <!-- BOTTOM SECTION: LIBRARY PANEL -->
       <section id="library-section" class="sidebar-panel">
-        <!-- Minimized Stripe Bar -->
         <div class="stripe-bar">
           <span class="stripe-title">LIBRARY</span>
           <button class="panel-btn default-btn" data-tooltip="Default View" data-tooltip-pos="bottom-edge">
@@ -200,7 +205,6 @@
         </div>
 
         <div class="panel-full-content">
-          <!-- Library Header -->
           <div class="panel-header">
             <h2 class="panel-title">LIBRARY</h2>
             <div class="header-buttons">
@@ -215,13 +219,13 @@
             </div>
           </div>
 
-          <!-- Library Main Body -->
+          <!-- Library Content -->
           <div id="library-content" class="panel-body"></div>
 
-          <!-- Path Bar -->
+          <!-- Item #4: Path Bar pinned to bottom edge -->
           <div id="library-path-row" class="path-bar">
             <span id="library-path-text" class="path-text">Home</span>
-            <button id="toggle-path-btn" class="path-toggle-btn" data-tooltip="File Path" data-tooltip-pos="bottom-edge">
+            <button id="toggle-path-btn" class="path-toggle-btn" data-tooltip="File Path" data-tooltip-pos="top">
               <svg id="path-toggle-icon" width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                 <rect x="2" y="2" width="12" height="12" fill="currentColor"/>
               </svg>
@@ -234,7 +238,6 @@
 
   </div>
 
-  <!-- MapLibre GL JS Script -->
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="app.js"></script>
 </body>

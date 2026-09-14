@@ -1,15 +1,12 @@
-// ==========================================
 // CONSTANTS & STATE STORE
-// ==========================================
 const MA_CENTER = [-71.3824, 42.4072];
 const MA_ZOOM = 8;
 const MIN_YEAR = 1620;
 const MAX_YEAR = 2020;
 
-// Application State
 let currentYear = 1620;
-let isLinked = false; // Linked Mode (default Unlinked per spec)
-let isMapLocked = true;
+let isLinked = false;
+let isMapLocked = false; // Item #1: Default Unlocked
 let isPlaying = false;
 let playInterval = null;
 let currentZoomIndex = 0; // 0: CENTURY, 1: DECADE, 2: YEAR
@@ -19,7 +16,6 @@ let highlightedCardId = null;
 let historyStack = ["root"];
 let historyIndex = 0;
 
-// Timeline Event Records
 const eventsData = [
   { id: "evt-1620", year: 1620, monthDay: null, title: "Plymouth Colony", desc: "Mayflower lands; Plymouth established.", townId: "plymouth" },
   { id: "evt-1630", year: 1630, monthDay: "August 5", title: "Boston Incorporated", desc: "Boston settled under John Winthrop.", townId: "boston", cardLinkId: "john-winthrop" },
@@ -31,7 +27,6 @@ const eventsData = [
   { id: "evt-1711-needham", year: 1711, monthDay: "November 5", title: "Needham Incorporated", desc: "Needham incorporated from northern Dedham.", townId: "needham" }
 ];
 
-// Map Initialization
 const map = new maplibregl.Map({
   container: 'map',
   style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -39,7 +34,6 @@ const map = new maplibregl.Map({
   zoom: MA_ZOOM
 });
 
-// Initialization Handler
 document.addEventListener("DOMContentLoaded", () => {
   initMapLockControl();
   initPanelResizer();
@@ -65,16 +59,12 @@ map.on('load', () => {
   });
 });
 
-// ==========================================
-// 1. STATE MACHINE & CORE UPDATES
-// ==========================================
+// SYSTEM STATE & MAP SYNC
 function updateSystemState() {
-  // Update Showing Bar
   document.getElementById('year-field').value = currentYear;
   const eventsInYear = eventsData.filter(e => e.year === currentYear);
   document.getElementById('events-amount').textContent = `(${eventsInYear.length} ${eventsInYear.length === 1 ? 'event' : 'events'})`;
 
-  // Update Map Layer
   if (map.getLayer('towns-base')) {
     map.setFilter('towns-base', [
       'all',
@@ -83,14 +73,8 @@ function updateSystemState() {
     ]);
   }
 
-  // Position Timeline Handle
   positionTimelineHandle(currentYear);
-
-  // Position Here Indicator
-  const targetYear = getActiveIndicatorYear();
-  positionHereIndicator(targetYear);
-
-  // Sync Map Highlight
+  positionHereIndicator(getActiveIndicatorYear());
   updateMapHighlight();
 }
 
@@ -117,9 +101,7 @@ function updateMapHighlight() {
   }
 }
 
-// ==========================================
-// 2. TIMELINE PANEL & EVENT CARD LOGIC
-// ==========================================
+// TIMELINE CARDS
 function renderTimelineEvents() {
   const container = document.getElementById('event-cards-list');
   container.innerHTML = '';
@@ -151,7 +133,6 @@ function renderTimelineEvents() {
       </div>
     `;
 
-    // Event Listeners (Per Spec 2.2 State Machine)
     card.addEventListener('click', (e) => {
       if (e.target.classList.contains('library-link')) return;
 
@@ -167,10 +148,7 @@ function renderTimelineEvents() {
 }
 
 function handleCardBodyClick(event) {
-  // Spec 2.2: If system is Linked and a card is Selected, clicking card body does NOTHING
   if (isLinked && selectedCardId) return;
-
-  // Unlinked mode: highlight card, move Here indicator to event year, map does NOT move
   highlightedCardId = event.id;
   selectedCardId = null;
   updateCardVisualStates();
@@ -178,29 +156,26 @@ function handleCardBodyClick(event) {
 }
 
 function handleGoButtonClick(event) {
-  // Spec 2.2: Clicking currently Selected card's Go button toggles it to Highlighted and Unlinks system
   if (selectedCardId === event.id && isLinked) {
     selectedCardId = null;
     highlightedCardId = event.id;
     setLinkedState(false);
   } else {
-    // Select card, move handle to year, update map
     selectedCardId = event.id;
     highlightedCardId = null;
     currentYear = event.year;
-
-    // Scroll card to Top Position (~35px offset)
     scrollCardToTopPosition(event.id);
   }
   updateCardVisualStates();
   updateSystemState();
 }
 
+// Item #7: Scrolls card to top position within scrollable panel body
 function scrollCardToTopPosition(eventId) {
   const cardEl = document.getElementById(`card-${eventId}`);
   const panelBody = document.getElementById('timeline-body');
   if (cardEl && panelBody) {
-    const targetScroll = Math.max(0, cardEl.offsetTop - 35);
+    const targetScroll = Math.max(0, cardEl.offsetTop - 12);
     panelBody.scrollTo({ top: targetScroll, behavior: 'smooth' });
   }
 }
@@ -219,9 +194,7 @@ function updateCardVisualStates() {
   }
 }
 
-// ==========================================
-// 3. SLIDER TIMELINE & ZOOM SYSTEM
-// ==========================================
+// SLIDER TIMELINE & ZOOM (Item #11 & #12: Dynamic track expansion & year titles)
 function setupSliderTimeline() {
   const zoomSlider = document.getElementById('zoom-slider');
   const zoomTitle = document.getElementById('zoom-level-title');
@@ -230,17 +203,26 @@ function setupSliderTimeline() {
 
   zoomSlider.addEventListener('input', (e) => {
     currentZoomIndex = parseInt(e.target.value, 10);
-    const titles = ["CENTURY", "DECADE", "YEAR"];
-    zoomTitle.textContent = titles[currentZoomIndex];
+    zoomTitle.textContent = ["CENTURY", "DECADE", "YEAR"][currentZoomIndex];
     renderTimelineAxis();
   });
 
   document.getElementById('zoom-out-btn').addEventListener('click', () => {
-    if (currentZoomIndex > 0) { currentZoomIndex--; zoomSlider.value = currentZoomIndex; zoomTitle.textContent = ["CENTURY", "DECADE", "YEAR"][currentZoomIndex]; renderTimelineAxis(); }
+    if (currentZoomIndex > 0) {
+      currentZoomIndex--;
+      zoomSlider.value = currentZoomIndex;
+      zoomTitle.textContent = ["CENTURY", "DECADE", "YEAR"][currentZoomIndex];
+      renderTimelineAxis();
+    }
   });
 
   document.getElementById('zoom-in-btn').addEventListener('click', () => {
-    if (currentZoomIndex < 2) { currentZoomIndex++; zoomSlider.value = currentZoomIndex; zoomTitle.textContent = ["CENTURY", "DECADE", "YEAR"][currentZoomIndex]; renderTimelineAxis(); }
+    if (currentZoomIndex < 2) {
+      currentZoomIndex++;
+      zoomSlider.value = currentZoomIndex;
+      zoomTitle.textContent = ["CENTURY", "DECADE", "YEAR"][currentZoomIndex];
+      renderTimelineAxis();
+    }
   });
 }
 
@@ -254,25 +236,37 @@ function renderTimelineAxis() {
   titlesRow.innerHTML = '';
   circlesContainer.innerHTML = '';
 
+  // Item #11: Expand track width on Decade (300%) and Year (1200%) views
+  const trackWidths = ["100%", "300%", "1200%"];
+  track.style.width = trackWidths[currentZoomIndex];
+
+  // Item #12: Adjust tick and label frequency per zoom level
   let majorInterval = 25;
   let minorInterval = 5;
+  let labelInterval = 25;
 
-  if (currentZoomIndex === 1) { majorInterval = 10; minorInterval = 1; }
-  else if (currentZoomIndex === 2) { majorInterval = 1; minorInterval = 0.1; }
+  if (currentZoomIndex === 1) {
+    majorInterval = 10;
+    minorInterval = 1;
+    labelInterval = 10;
+  } else if (currentZoomIndex === 2) {
+    majorInterval = 1;
+    minorInterval = 0.1;
+    labelInterval = 1;
+  }
 
   const totalYears = MAX_YEAR - MIN_YEAR;
 
-  // Render Ticks & Labels
   for (let yr = MIN_YEAR; yr <= MAX_YEAR; yr += minorInterval) {
     const pct = ((yr - MIN_YEAR) / totalYears) * 100;
-    const isMajor = (yr % majorInterval === 0);
+    const isMajor = Math.abs(yr % majorInterval) < 0.01;
 
     const tick = document.createElement('div');
     tick.className = `tick-mark ${isMajor ? 'major' : 'minor'}`;
     tick.style.left = `${pct}%`;
     ticksContainer.appendChild(tick);
 
-    if (isMajor && yr % 25 === 0) {
+    if (Math.abs(yr % labelInterval) < 0.01) {
       const label = document.createElement('span');
       label.className = 'year-title-label';
       label.style.left = `${pct}%`;
@@ -281,11 +275,11 @@ function renderTimelineAxis() {
     }
   }
 
-  // Render Event Circles (Stacked / Clustered per Spec 3)
+  // Clustered Event Circles
   const groupedEvents = {};
   eventsData.forEach(event => {
     let bucketYear = event.year;
-    if (currentZoomIndex === 0) bucketYear = Math.floor(event.year / 5) * 5; // 5-yr clusters
+    if (currentZoomIndex === 0) bucketYear = Math.floor(event.year / 5) * 5;
     if (!groupedEvents[bucketYear]) groupedEvents[bucketYear] = [];
     groupedEvents[bucketYear].push(event);
   });
@@ -303,12 +297,8 @@ function renderTimelineAxis() {
       ? `${bYear}–${rangeEnd} (${list.length} events)`
       : `${list[0].year} (${list.length} ${list.length === 1 ? 'event' : 'events'})`;
 
-    circle.addEventListener('mouseenter', () => {
-      document.getElementById('circle-tooltip-bar').textContent = tooltipText;
-    });
-    circle.addEventListener('mouseleave', () => {
-      document.getElementById('circle-tooltip-bar').textContent = '';
-    });
+    circle.addEventListener('mouseenter', () => { document.getElementById('circle-tooltip-bar').textContent = tooltipText; });
+    circle.addEventListener('mouseleave', () => { document.getElementById('circle-tooltip-bar').textContent = ''; });
 
     circle.addEventListener('click', () => {
       currentYear = list[0].year;
@@ -342,9 +332,7 @@ function positionHereIndicator(year) {
   }
 }
 
-// ==========================================
-// 4. CONTROLS ROW & LINK BUTTON LOGIC
-// ==========================================
+// CONTROLS ROW
 function setupControlsRow() {
   const playBtn = document.getElementById('play-pause-btn');
   const playIcon = document.getElementById('play-icon');
@@ -353,41 +341,20 @@ function setupControlsRow() {
   const yearField = document.getElementById('year-field');
   const statusText = document.getElementById('showing-status-text');
 
-  // Stepper Buttons
-  document.getElementById('prev-year-btn').addEventListener('click', () => {
-    pausePlayback();
-    if (currentYear > MIN_YEAR) { currentYear--; updateSystemState(); }
-  });
-  document.getElementById('next-year-btn').addEventListener('click', () => {
-    pausePlayback();
-    if (currentYear < MAX_YEAR) { currentYear++; updateSystemState(); }
-  });
-  document.getElementById('prev-event-btn').addEventListener('click', () => {
-    pausePlayback();
-    stepEvent(-1);
-  });
-  document.getElementById('next-event-btn').addEventListener('click', () => {
-    pausePlayback();
-    stepEvent(1);
-  });
+  document.getElementById('prev-year-btn').addEventListener('click', () => { pausePlayback(); if (currentYear > MIN_YEAR) { currentYear--; updateSystemState(); } });
+  document.getElementById('next-year-btn').addEventListener('click', () => { pausePlayback(); if (currentYear < MAX_YEAR) { currentYear++; updateSystemState(); } });
+  document.getElementById('prev-event-btn').addEventListener('click', () => { pausePlayback(); stepEvent(-1); });
+  document.getElementById('next-event-btn').addEventListener('click', () => { pausePlayback(); stepEvent(1); });
 
-  // Play / Pause Animation
-  playBtn.addEventListener('click', () => {
-    if (isPlaying) pausePlayback(); else startPlayback();
-  });
+  playBtn.addEventListener('click', () => { if (isPlaying) pausePlayback(); else startPlayback(); });
 
   function startPlayback() {
     isPlaying = true;
     playIcon.textContent = '║║';
     playText.textContent = 'Pause';
     playInterval = setInterval(() => {
-      if (currentYear >= MAX_YEAR) {
-        pausePlayback(); // Spec 2.3.2: Auto-pause at 2020
-      } else {
-        currentYear++;
-        updateSystemState();
-      }
-    }, 1500); // Spec 2.3.1: 1.5s per event step
+      if (currentYear >= MAX_YEAR) pausePlayback(); else { currentYear++; updateSystemState(); }
+    }, 1500);
   }
 
   function pausePlayback() {
@@ -397,12 +364,8 @@ function setupControlsRow() {
     clearInterval(playInterval);
   }
 
-  // Link Button Toggle (Spec 2.4 / Showing Controls)
-  linkBtn.addEventListener('click', () => {
-    setLinkedState(!isLinked);
-  });
+  linkBtn.addEventListener('click', () => setLinkedState(!isLinked));
 
-  // Year Field Manual Typing (Spec 2.4)
   yearField.addEventListener('focus', () => { statusText.textContent = "Type Year, Hit Enter"; });
   yearField.addEventListener('blur', () => { statusText.textContent = ""; });
   yearField.addEventListener('keydown', (e) => {
@@ -437,7 +400,6 @@ function setLinkedState(linked) {
     linkBtn.classList.add('linked');
     linkedIndicator.className = 'linked-indicator blue';
 
-    // Move Here indicator to Handle position & select top event
     const evt = eventsData.find(e => e.year === currentYear);
     if (evt) {
       selectedCardId = evt.id;
@@ -475,17 +437,19 @@ function stepEvent(direction) {
   }
 }
 
-// ==========================================
-// 5. MAP FOCUS LOCK & PANEL RESIZER
-// ==========================================
+// Item #1: MAP FOCUS LOCK (Default Unlocked)
 function initMapLockControl() {
   const lockBtn = document.getElementById('lock-view-btn');
   const lockIcon = document.getElementById('lock-icon');
   const lockText = document.getElementById('lock-text');
 
-  lockBtn.addEventListener('click', () => {
-    isMapLocked = !isMapLocked;
-    if (isMapLocked) {
+  setMapLockState(false);
+
+  lockBtn.addEventListener('click', () => setMapLockState(!isMapLocked));
+
+  function setMapLockState(locked) {
+    isMapLocked = locked;
+    if (locked) {
       lockBtn.classList.add('locked'); lockText.textContent = 'Locked';
       lockIcon.innerHTML = `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>`;
       map.flyTo({ center: MA_CENTER, zoom: MA_ZOOM });
@@ -495,7 +459,7 @@ function initMapLockControl() {
       lockIcon.innerHTML = `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path>`;
       map.dragPan.enable(); map.scrollZoom.enable();
     }
-  });
+  }
 }
 
 function initPanelResizer() {
@@ -505,21 +469,16 @@ function initPanelResizer() {
   const sidebar = document.getElementById('sidebar');
 
   let isDragging = false;
-
   resizer.addEventListener('mousedown', () => { isDragging = true; resizer.classList.add('dragging'); });
   document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     const sidebarRect = sidebar.getBoundingClientRect();
     const offsetY = e.clientY - sidebarRect.top;
     const totalHeight = sidebarRect.height;
-
-    // Enforce Hard Pixel Boundary Limits per Spec Section 4.2
-    const minTimelineHeight = 34 + 34; // Header + Header height
-    const minLibraryHeight = 34 + 34 + 34; // Header + Header + Path Bar
-
+    const minTimelineHeight = 34 + 34;
+    const minLibraryHeight = 34 + 34 + 34;
     const clampedY = Math.max(minTimelineHeight, Math.min(totalHeight - minLibraryHeight, offsetY));
     const topPercent = (clampedY / totalHeight) * 100;
-
     timelineSection.style.height = `${topPercent}%`;
     librarySection.style.height = `${100 - topPercent}%`;
   });
@@ -543,30 +502,25 @@ function initPanelMinimization() {
   }
 
   document.querySelectorAll('.default-btn').forEach(btn => btn.addEventListener('click', resetSizes));
-
   timeline.querySelector('.controls-right .minimize-btn')?.addEventListener('click', () => {
     timeline.classList.add('minimized'); library.classList.remove('minimized');
     library.style.height = 'calc(100% - 34px)'; updateMinimizeButtons();
   });
-
   library.querySelector('.controls-right .minimize-btn')?.addEventListener('click', () => {
     library.classList.add('minimized'); timeline.classList.remove('minimized');
     timeline.style.height = 'calc(100% - 34px)'; updateMinimizeButtons();
   });
-
   timeline.querySelector('.stripe-bar').addEventListener('click', resetSizes);
   library.querySelector('.stripe-bar').addEventListener('click', resetSizes);
 }
 
-// ==========================================
-// 6. LIBRARY PANEL & PATH BAR
-// ==========================================
+// LIBRARY STORE & PATH BAR (Item #3 & #6)
 const libraryStore = {
   root: { title: "Home", type: "folder", children: [{ id: "folder-figures", title: "Notable Figures", type: "folder", icon: "📁" }, { id: "folder-events", title: "Key Events", type: "folder", icon: "📁" }] },
-  "folder-figures": { title: "Notable Figures", path: ["Home", "Notable Figures"], type: "folder", children: [{ id: "john-winthrop", title: "John Winthrop", type: "card", icon: "👤" }] },
-  "folder-events": { title: "Key Events", path: ["Home", "Key Events"], type: "folder", children: [{ id: "dedham-grant", title: "Dedham Plantation Grant", type: "card", icon: "📜" }] },
-  "john-winthrop": { type: "card", title: "John Winthrop (1588–1649)", path: ["Home", "Notable Figures", "John Winthrop"], category: "Notable Figures", content: "English Puritan lawyer and one of the leading figures in founding the Massachusetts Bay Colony." },
-  "dedham-grant": { type: "card", title: "Dedham Plantation Grant (1636)", path: ["Home", "Key Events", "Dedham Plantation Grant"], category: "Key Events", content: "In 1636, the General Court granted a vast tract of land southwest of Boston to form Dedham." }
+  "folder-figures": { title: "Notable Figures", path: [{ id: "root", title: "Home" }, { id: "folder-figures", title: "Notable Figures" }], type: "folder", children: [{ id: "john-winthrop", title: "John Winthrop", type: "card", icon: "👤" }] },
+  "folder-events": { title: "Key Events", path: [{ id: "root", title: "Home" }, { id: "folder-events", title: "Key Events" }], type: "folder", children: [{ id: "dedham-grant", title: "Dedham Plantation Grant", type: "card", icon: "📜" }] },
+  "john-winthrop": { type: "card", title: "John Winthrop (1588–1649)", path: [{ id: "root", title: "Home" }, { id: "folder-figures", title: "Notable Figures" }, { id: "john-winthrop", title: "John Winthrop" }], content: "English Puritan lawyer and one of the leading figures in founding the Massachusetts Bay Colony." },
+  "dedham-grant": { type: "card", title: "Dedham Plantation Grant (1636)", path: [{ id: "root", title: "Home" }, { id: "folder-events", title: "Key Events" }, { id: "dedham-grant", title: "Dedham Plantation Grant" }], content: "In 1636, the General Court granted a vast tract of land southwest of Boston to form Dedham." }
 };
 
 function initLibrary() {
@@ -604,6 +558,7 @@ function navigateToLibrary(id) {
   renderLibraryView(id);
 }
 
+// Item #3 & #6: Correct Path Bar links & folder category title removed from page cards
 function renderLibraryView(id) {
   const item = libraryStore[id] || libraryStore["root"];
   const contentEl = document.getElementById("library-content");
@@ -614,8 +569,8 @@ function renderLibraryView(id) {
   backBtn.disabled = historyIndex <= 0;
   fwdBtn.disabled = historyIndex >= historyStack.length - 1;
 
-  const pathArray = item.path || ["Home"];
-  pathTextEl.innerHTML = pathArray.map((p, i) => `<a onclick="navigateToLibrary('${i === 0 ? 'root' : id}')">${p}</a>`).join(" &gt; ");
+  const pathArray = item.path || [{ id: "root", title: "Home" }];
+  pathTextEl.innerHTML = pathArray.map(p => `<a onclick="navigateToLibrary('${p.id}')">${p.title}</a>`).join(" &gt; ");
 
   if (item.type === "folder") {
     let gridHtml = `<div class="explorer-grid">`;
@@ -625,6 +580,7 @@ function renderLibraryView(id) {
     gridHtml += `</div>`;
     contentEl.innerHTML = gridHtml;
   } else {
-    contentEl.innerHTML = `<div class="info-card"><div class="card-category">${item.category}</div><h3>${item.title}</h3><p>${item.content}</p></div>`;
+    // Item #6: Removed folder category text above card title
+    contentEl.innerHTML = `<div class="info-card"><h3>${item.title}</h3><p>${item.content}</p></div>`;
   }
 }
